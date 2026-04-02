@@ -2,10 +2,8 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-
-exports.signup = async(req, res) => {
+export const signup = async (req, res) => {
     try {
-
         const { name, email, password, role } = req.body;
 
         const userExists = await User.findOne({ email });
@@ -33,11 +31,8 @@ exports.signup = async(req, res) => {
     }
 };
 
-
-
-exports.login = async(req, res) => {
+export const login = async (req, res) => {
     try {
-
         const { email, password } = req.body;
 
         const user = await User.findOne({ email });
@@ -52,8 +47,10 @@ exports.login = async(req, res) => {
             return res.status(400).json({ message: "Invalid credentials" });
         }
 
-        const token = jwt.sign({ id: user._id, role: user.role },
-            process.env.JWT_SECRET, { expiresIn: "1d" }
+        const token = jwt.sign(
+            { id: user._id, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: "1d" }
         );
 
         res.json({
