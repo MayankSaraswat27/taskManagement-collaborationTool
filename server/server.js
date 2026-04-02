@@ -1,11 +1,15 @@
-const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
 
-const connectDB = require("./config/db");
+import connectDB from "./config/db.js";
+import authRoutes from "./routes/authRoutes.js";
+import taskRoutes from "./routes/taskRoute.js";
+
+import protect from "./middleware/authMiddleware.js";
+import adminOnly from "./middleware/adminMiddleware.js";
 
 dotenv.config();
-
 connectDB();
 
 const app = express();
@@ -13,33 +17,19 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/auth", authRoutes);
+app.use("/api/tasks", taskRoutes);
+
+app.get("/api/protected", protect, (req, res) => {
+    res.json({ message: "Protected route accessed", user: req.user });
+});
+
+app.get("/api/admin", protect, adminOnly, (req, res) => {
+    res.json({ message: "Welcome Admin", user: req.user });
+});
 
 const PORT = process.env.PORT || 5000;
 
-
-const protect = require("./middleware/authMiddleware");
-
-app.get("/api/protected", protect, (req, res) => {
-
-    res.json({
-        message: "Protected route accessed",
-        user: req.user
-    });
-
-});
-
-const adminOnly = require("./middleware/adminMiddleware");
-
-app.get("/api/admin", protect, adminOnly, (req, res) => {
-
-    res.json({
-        message: "Welcome Admin",
-        user: req.user
-    });
-
-});
-
 app.listen(PORT, () => {
-    console.log("Server running on port ${PORT}");
+    console.log(`Server running on port ${PORT}`);
 });
