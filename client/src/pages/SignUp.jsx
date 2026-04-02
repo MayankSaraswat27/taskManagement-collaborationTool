@@ -1,46 +1,55 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Input } from '../components/ui/Input';
-import { Button } from '../components/ui/Button';
-import { User, Mail, Lock, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Button } from "../components/ui/Button";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
 
 export const SignUp = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [success, setSuccess] = useState(false);
+
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (password === confirmPassword) {
-      navigate('/dashboard');
+
+    if (password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
     }
+
+    setSuccess(true);
+
+    setTimeout(() => {
+      navigate("/login");
+    }, 1500);
   };
 
   const benefits = [
-    'Unlimited tasks and projects',
-    'Real-time collaboration',
-    'Advanced analytics',
-    'Priority support',
-    'Custom workflows',
-    'Mobile apps'
+    "Unlimited tasks and projects",
+    "Real-time collaboration",
+    "Advanced analytics",
+    "Priority support",
+    "Custom workflows",
+    "Mobile apps",
   ];
 
   return (
     <div className="min-h-screen flex">
-      
+
       {/* Back Button */}
       <Link
         to="/"
-        className="absolute top-6 left-6 z-50 flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+        className="absolute top-6 left-6 z-50 flex items-center gap-2 text-gray-700 hover:text-blue-600"
       >
         <ArrowLeft className="w-5 h-5" />
         <span className="font-medium">Back to Home</span>
       </Link>
 
-      {/* LEFT SIDE */}
+      {/* LEFT SIDE (UNCHANGED ORIGINAL STYLE) */}
       <motion.div
         initial={{ x: 100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
@@ -113,84 +122,102 @@ export const SignUp = () => {
         </div>
       </motion.div>
 
-      {/* RIGHT SIDE */}
-      <motion.div
-        initial={{ x: -100, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50 dark:bg-gray-900"
-      >
+      {/* RIGHT SIDE (FIXED INPUTS) */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50">
         <div className="w-full max-w-md">
 
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="mb-8"
-          >
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-              Create Account
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Get started with your free account today
-            </p>
-          </motion.div>
+          <h2 className="text-4xl font-bold mb-6">Create Account</h2>
 
-          <motion.form
-            onSubmit={handleSubmit}
-            className="space-y-5"
-          >
-            <Input
-              type="text"
-              label="Full Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+          {success && (
+            <div className="bg-green-100 text-green-600 p-3 rounded mb-4 text-center">
+              Account created successfully 🎉
+            </div>
+          )}
 
-            <Input
-              type="email"
-              label="Email Address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+          <form onSubmit={handleSubmit} className="space-y-5">
 
-            <Input
-              type="password"
-              label="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            {/* NAME */}
+            <div className="relative">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-4 pt-5 pb-2 border rounded-lg peer focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder=" "
+                required
+              />
+              <label className="absolute left-4 top-2 text-sm text-gray-500 transition-all 
+                peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base 
+                peer-focus:top-2 peer-focus:text-sm">
+                Full Name
+              </label>
+            </div>
 
-            <Input
-              type="password"
-              label="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              error={
-                confirmPassword && password !== confirmPassword
-                  ? "Passwords don't match"
-                  : undefined
-              }
-            />
+            {/* EMAIL */}
+            <div className="relative">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 pt-5 pb-2 border rounded-lg peer focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder=" "
+                required
+              />
+              <label className="absolute left-4 top-2 text-sm text-gray-500 transition-all 
+                peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base 
+                peer-focus:top-2 peer-focus:text-sm">
+                Email Address
+              </label>
+            </div>
+
+            {/* PASSWORD */}
+            <div className="relative">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 pt-5 pb-2 border rounded-lg peer focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder=" "
+                required
+              />
+              <label className="absolute left-4 top-2 text-sm text-gray-500 transition-all 
+                peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base 
+                peer-focus:top-2 peer-focus:text-sm">
+                Password
+              </label>
+            </div>
+
+            {/* CONFIRM PASSWORD */}
+            <div className="relative">
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-4 pt-5 pb-2 border rounded-lg peer focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder=" "
+                required
+              />
+              <label className="absolute left-4 top-2 text-sm text-gray-500 transition-all 
+                peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base 
+                peer-focus:top-2 peer-focus:text-sm">
+                Confirm Password
+              </label>
+            </div>
 
             <Button type="submit" className="w-full">
-              Create Account
+              {success ? "Creating..." : "Create Account"}
             </Button>
 
-            <p className="text-center text-gray-600 dark:text-gray-400">
-              Already have an account?{' '}
+            <p className="text-center text-gray-600">
+              Already have an account?{" "}
               <Link to="/login" className="text-blue-600 font-semibold">
                 Sign in
               </Link>
             </p>
 
-          </motion.form>
+          </form>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };
