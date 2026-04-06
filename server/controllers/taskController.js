@@ -1,6 +1,6 @@
 import Task from "../models/taskSchema.js";
 
-export const createTask = async (req, res) => {
+export const createTask = async(req, res) => {
     try {
         const task = await Task.create({
             ...req.body,
@@ -13,7 +13,7 @@ export const createTask = async (req, res) => {
     }
 };
 
-export const getTasks = async (req, res) => {
+export const getTasks = async(req, res) => {
     try {
         const tasks = await Task.find({ userId: req.user.id });
         res.json(tasks);
@@ -22,25 +22,88 @@ export const getTasks = async (req, res) => {
     }
 };
 
-export const updateTask = async (req, res) => {
+export const updateTask = async(req, res) => {
+
     try {
-        const task = await Task.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true }
+
+        const task = await Task.findOneAndUpdate({
+                _id: req.params.id,
+                userId: req.user.id
+            },
+            req.body, { new: true }
         );
 
+        if (!task) {
+            return res.status(404).json({
+                message: "Task not found or not authorized"
+            });
+        }
+
         res.json(task);
+
     } catch (error) {
-        res.status(500).json({ message: error.message });
+
+        res.status(500).json({
+            message: error.message
+        });
+
     }
+
 };
 
-export const deleteTask = async (req, res) => {
+export const deleteTask = async(req, res) => {
+
     try {
-        await Task.findByIdAndDelete(req.params.id);
-        res.json({ message: "Task deleted" });
+
+        const task = await Task.findOneAndDelete({
+            _id: req.params.id,
+            userId: req.user.id
+        });
+
+        if (!task) {
+            return res.status(404).json({
+                message: "Task not found or not authorized"
+            });
+        }
+
+        res.json({
+            message: "Task deleted successfully"
+        });
+
     } catch (error) {
-        res.status(500).json({ message: error.message });
+
+        res.status(500).json({
+            message: error.message
+        });
+
     }
+
+};
+
+
+export const getSingleTask = async(req, res) => {
+
+    try {
+
+        const task = await Task.findOne({
+            _id: req.params.id,
+            userId: req.user.id
+        });
+
+        if (!task) {
+            return res.status(404).json({
+                message: "Task not found"
+            });
+        }
+
+        res.json(task);
+
+    } catch (error) {
+
+        res.status(500).json({
+            message: error.message
+        });
+
+    }
+
 };
