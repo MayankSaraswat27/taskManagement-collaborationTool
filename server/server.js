@@ -9,6 +9,8 @@ import taskRoutes from "./routes/taskRoute.js";
 import protect from "./middleware/authMiddleware.js";
 import adminOnly from "./middleware/adminMiddleware.js";
 
+import boardRoutes from "./routes/boardRoutes.js";
+
 dotenv.config();
 connectDB();
 
@@ -19,6 +21,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
+app.use("/api/boards", boardRoutes);
 
 app.get("/api/protected", protect, (req, res) => {
     res.json({ message: "Protected route accessed", user: req.user });
