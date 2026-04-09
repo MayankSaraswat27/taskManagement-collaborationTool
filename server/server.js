@@ -8,7 +8,6 @@ import taskRoutes from "./routes/taskRoute.js";
 
 import protect from "./middleware/authMiddleware.js";
 import adminOnly from "./middleware/adminMiddleware.js";
-
 import boardRoutes from "./routes/boardRoutes.js";
 
 dotenv.config();
