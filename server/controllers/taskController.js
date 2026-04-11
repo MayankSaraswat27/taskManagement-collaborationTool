@@ -9,7 +9,7 @@ export const createTask = async (req, res) => {
 
     try {
 
-        const { title, description, status, listId } = req.body;
+        const { title, description, status, listId, assignedTo } = req.body;
 
         const task = await Task.create({
 
@@ -17,8 +17,8 @@ export const createTask = async (req, res) => {
             description,
             status,
             listId,
-            createdBy: req.user.id
-
+            createdBy: req.user.id,
+            assignedTo
         });
 
         res.status(201).json(task);
@@ -48,10 +48,10 @@ export const getTasks = async (req, res) => {
     try {
 
         const tasks = await Task.find({
-
             listId: req.params.listId
-
-        });
+        })
+        .populate("assignedTo", "name email")
+        .populate("createdBy", "name email");
 
         res.json(tasks);
 
