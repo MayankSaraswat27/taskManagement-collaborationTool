@@ -1,79 +1,54 @@
-import { DragDropContext } from 'react-beautiful-dnd'
+
 import Column from '../components/Column'
+import API from "../api";
+import { useEffect, useState } from "react";
 
 function KanbanBoard({ board, onUpdateBoard, onBack }) {
-  // Column display order and labels
-  const columns = [
-    { id: 'todo', title: 'To Do' },
-    { id: 'inProgress', title: 'In Progress' },
-    { id: 'completed', title: 'Completed' },
-  ]
+  const [lists, setLists] = useState([]);
+  useEffect(() => {
+  fetchLists();
+}, [board._id]);
+
+const fetchLists = async () => {
+  try {
+    const { data } = await API.get(`/lists/board/${board._id}`);
+    setLists(data);
+  } catch (error) {
+    console.error("Error fetching lists", error);
+  }
+};
+  
 
   // Count total tasks across all columns
-  const totalTasks = Object.values(board.columns).reduce(
-    (sum, tasks) => sum + tasks.length, 0
-  )
+  const totalTasks = lists.reduce(
+  (sum, list) => sum + (list.tasks?.length || 0),
+  0
+);
 
- 
-
-
-    function handleDragEnd(result) {
-  const { source, destination } = result;
-
-  if (!destination) return;
-
-  const sourceCol = source.droppableId;
-  const destCol = destination.droppableId;
-
-  // SAME COLUMN (reorder)
-  if (sourceCol === destCol) {
-    const tasks = [...board.columns[sourceCol]];
-    const [movedTask] = tasks.splice(source.index, 1);
-    tasks.splice(destination.index, 0, movedTask);
-
-    const updatedColumns = {
-      ...board.columns,
-      [sourceCol]: tasks,
-    };
-
-    onUpdateBoard({ ...board, columns: updatedColumns });
-  }
-
-  // DIFFERENT COLUMN (move)
-  else {
-    const sourceTasks = [...board.columns[sourceCol]];
-    const destTasks = [...board.columns[destCol]];
-
-    const [movedTask] = sourceTasks.splice(source.index, 1);
-    destTasks.splice(destination.index, 0, movedTask);
-
-    const updatedColumns = {
-      ...board.columns,
-      [sourceCol]: sourceTasks,
-      [destCol]: destTasks,
-    };
-
-    onUpdateBoard({ ...board, columns: updatedColumns });
-  }
-}
 
   // Add a new task to a specific column
-  function handleAddTask(columnId, taskData) {
-    const newTask = {
-      id: `task-${Date.now()}`,
+  const handleAddTask = async (listId, taskData) => {
+  try {
+    await API.post("/tasks", {
       title: taskData.title,
       priority: taskData.priority,
-      deadline: taskData.deadline,
-    }
+      dueDate: taskData.deadline,
+      list: listId,
+    });
 
-    const updatedColumns = {
-      ...board.columns,
-      [columnId]: [...board.columns[columnId], newTask],
-    }
-
-    onUpdateBoard({ ...board, columns: updatedColumns })
+    fetchLists(); // refresh
+  } catch (error) {
+    alert("Failed to add task");
   }
-
+};
+const handleDeleteTask = async (taskId) => {
+  try {
+    await API.delete(`/tasks/${taskId}`);
+    fetchLists(); // refresh UI
+  } catch (error) {
+    console.error("Delete failed", error);
+  }
+};
   return (
     <div className="flex flex-col h-full">
       {/* Board header */}
@@ -95,19 +70,19 @@ function KanbanBoard({ board, onUpdateBoard, onBack }) {
       </div>
 
       {/* Columns */}
-      <DragDropContext onDragEnd={handleDragEnd}>
+  
         <div className="flex gap-5 overflow-x-auto pb-4">
-          {columns.map((col) => (
+          {lists.map((list) => (
             <Column
-              key={col.id}
-              title={col.title}
-              columnId={col.id}
-              tasks={board.columns[col.id] || []}
-              onAddTask={handleAddTask}
-            />
+  key={list._id}
+  title={list.title}
+  columnId={list._id}
+  tasks={list.tasks || []}
+  onAddTask={(taskData) => handleAddTask(list._id, taskData)}
+  onDelete={handleDeleteTask}
+/>
           ))}
         </div>
-      </DragDropContext>
     </div>
   )
 }
