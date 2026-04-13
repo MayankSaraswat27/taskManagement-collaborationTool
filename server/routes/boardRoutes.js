@@ -1,39 +1,28 @@
 import express from "express";
 
 import {
-
-    createBoard,
-    getBoards,
-    assignUsersToBoard
-
+  createBoard,
+  getBoards,
+  getSingleBoard,
+  addMembers,
+  removeMember,
 } from "../controllers/boardController.js";
 
 import protect from "../middleware/authMiddleware.js";
 import adminOnly from "../middleware/adminMiddleware.js";
+import { deleteBoard } from "../controllers/boardController.js";
 
 const router = express.Router();
 
-/*
-ADMIN CREATE BOARD
-*/
-
-router.post("/", protect, adminOnly, createBoard);
-
-
-/*
-GET BOARDS
-ADMIN → all boards
-USER → assigned boards only
-*/
+router.post("/", protect, createBoard);
 
 router.get("/", protect, getBoards);
 
+router.get("/:id", protect, getSingleBoard);
+router.delete("/:id", protect, deleteBoard);
 
-/*
-ADMIN ASSIGN USERS TO BOARD
-*/
+router.post("/:id/members", protect, adminOnly, addMembers);
 
-router.put("/assign/:id", protect, adminOnly, assignUsersToBoard);
-
+router.delete("/:id/members/:userId", protect, adminOnly, removeMember);
 
 export default router;
