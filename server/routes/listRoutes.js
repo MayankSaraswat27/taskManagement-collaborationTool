@@ -1,37 +1,22 @@
 import express from "express";
 
 import {
-
-    createList,
-    getListsByBoard,
-    deleteList
-
+  createList,
+  getListsByBoard,
+  updateList,
+  deleteList,
 } from "../controllers/listController.js";
 
 import protect from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-
-/*
-CREATE LIST INSIDE BOARD
-*/
-
 router.post("/", protect, createList);
 
+router.get("/board/:boardId", protect, getListsByBoard);
 
-/*
-GET LISTS OF A BOARD
-*/
-
-router.get("/:boardId", protect, getListsByBoard);
-
-
-/*
-DELETE LIST
-*/
+router.put("/:id", protect, updateList);
 
 router.delete("/:id", protect, deleteList);
-
 
 export default router;
