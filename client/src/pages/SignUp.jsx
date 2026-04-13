@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/Button";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import API from "../api";
 
 export const SignUp = () => {
   const [name, setName] = useState("");
@@ -13,20 +14,32 @@ export const SignUp = () => {
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (password !== confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
+  if (password !== confirmPassword) {
+    alert("Passwords do not match");
+    return;
+  }
+
+  try {
+    const { data } = await API.post("/auth/signup", {
+      name,
+      email,
+      password,
+    });
 
     setSuccess(true);
 
+    // 🔐 optional: auto login after signup
     setTimeout(() => {
-      navigate("/login");
+      navigate("/login"); // or "/dashboard" if auto-login
     }, 1500);
-  };
+
+  } catch (error) {
+    alert(error.response?.data?.message || "Signup failed");
+  }
+};
 
   const benefits = [
     "Unlimited tasks and projects",
@@ -221,3 +234,4 @@ export const SignUp = () => {
     </div>
   );
 };
+export default SignUp;
