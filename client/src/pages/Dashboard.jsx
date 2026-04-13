@@ -1,96 +1,9 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+import API from "../api";
+import { useEffect } from "react";
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import KanbanBoard from '../components/KanbanBoard'
 
-// Initial dummy boards with pre-populated tasks
-
-const initialBoards = [
-  {
-    id: 'board-1',
-    title: 'Website Redesign',
-    columns: {
-      todo: [
-        { id: 'task-1', title: 'Design new homepage mockups', priority: 'High', deadline: '2024-05-10' },
-        { id: 'task-2', title: 'Write content for About page', priority: 'Medium', deadline: '2024-05-15' },
-      ],
-      inProgress: [
-        { id: 'task-3', title: 'Conduct user interviews', priority: 'High', deadline: '2024-05-08' },
-      ],
-      completed: [
-        { id: 'task-4', title: 'Define project scope', priority: 'Low', deadline: '2024-04-30' },
-      ],
-    },
-  },
-  {
-    id: 'board-2',
-    title: 'Mobile App Development',
-    columns: {
-      todo: [
-        { id: 'task-5', title: 'Set up development environment', priority: 'High', deadline: '2024-05-12' },
-        { id: 'task-6', title: 'Design onboarding flow', priority: 'Medium', deadline: '2024-05-20' },
-      ],
-      inProgress: [
-        { id: 'task-7', title: 'Build authentication screens', priority: 'High', deadline: '2024-05-14' },
-      ],
-      completed: [],
-    },
-  },
-  {
-    id: 'board-3',
-    title: 'Q2 Marketing Campaign',
-    columns: {
-      todo: [
-        { id: 'task-8', title: 'Create social media calendar', priority: 'Medium', deadline: '2024-05-18' },
-      ],
-      inProgress: [
-        { id: 'task-9', title: 'Draft email newsletter', priority: 'High', deadline: '2024-05-10' },
-        { id: 'task-10', title: 'Design banner ads', priority: 'Low', deadline: '2024-05-22' },
-      ],
-      completed: [
-        { id: 'task-11', title: 'Competitor analysis', priority: 'Medium', deadline: '2024-04-28' },
-        { id: 'task-12', title: 'Set campaign goals', priority: 'High', deadline: '2024-04-25' },
-      ],
-    },
-  },
-]
 
 // Sidebar navigation items
 const navItems = [
@@ -103,43 +16,13 @@ const navItems = [
       </svg>
     ),
   },
-  {
-    id: 'boards',
-    label: 'My Boards',
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
-      </svg>
-    ),
-  },
-  {
-    id: 'teams',
-    label: 'Teams',
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
-  },
-  {
-    id: 'settings',
-    label: 'Settings',
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
-  },
 ]
 
 function BoardCard({ board, onEdit, onDelete, onOpen }) {
   const [showMenu, setShowMenu] = useState(false)
 
-  const totalTasks = Object.values(board.columns).reduce(
-    (sum, tasks) => sum + tasks.length, 0
-  )
-  const completedCount = board.columns.completed.length
+  const totalTasks = 0;
+const completedCount = 0;
 
   // Board color themes
   const boardColors = [
@@ -149,7 +32,7 @@ function BoardCard({ board, onEdit, onDelete, onOpen }) {
     'from-pink-400 to-pink-500',
     'from-cyan-400 to-cyan-500',
   ]
-  const colorIndex = parseInt(board.id.split('-')[1]) % boardColors.length
+  const colorIndex = Math.floor(Math.random() * boardColors.length);
   const gradient = boardColors[colorIndex] || boardColors[0]
 
   return (
@@ -234,7 +117,20 @@ function BoardCard({ board, onEdit, onDelete, onOpen }) {
 
 function Dashboard() {
   const navigate = useNavigate()
-  const [boards, setBoards] = useState(initialBoards)
+  const [boards, setBoards] = useState([]);
+
+useEffect(() => {
+  fetchBoards();
+}, []);
+
+const fetchBoards = async () => {
+  try {
+    const { data } = await API.get("/boards");
+    setBoards(data);
+  } catch (error) {
+    console.error("Error fetching boards", error);
+  }
+};
   const [activeNav, setActiveNav] = useState('dashboard')
   const [selectedBoardId, setSelectedBoardId] = useState(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -242,46 +138,66 @@ function Dashboard() {
   const [editingBoard, setEditingBoard] = useState(null)
   const [editTitle, setEditTitle] = useState('')
 
-  const selectedBoard = boards.find((b) => b.id === selectedBoardId)
+
+  const selectedBoard = boards.find(
+  (b) => b._id === selectedBoardId
+);
 
   // Create a new board
-  function handleCreateBoard() {
-    if (!newBoardTitle.trim()) return
-    const newBoard = {
-      id: `board-${Date.now()}`,
-      title: newBoardTitle.trim(),
-      columns: { todo: [], inProgress: [], completed: [] },
-    }
-    setBoards([...boards, newBoard])
-    setNewBoardTitle('')
-    setShowCreateModal(false)
+  const handleCreateBoard = async () => {
+  if (!newBoardTitle.trim()) return;
+
+  try {
+    const { data } = await API.post("/boards", {
+      title: newBoardTitle,
+    });
+
+    setBoards([...boards, data]);
+    setNewBoardTitle("");
+    setShowCreateModal(false);
+
+  } catch (error) {
+    alert("Failed to create board");
   }
+};
 
   // Delete a board by id
-  function handleDeleteBoard(boardId) {
-    setBoards(boards.filter((b) => b.id !== boardId))
+  const handleDeleteBoard = async (boardId) => {
+  try {
+    await API.delete(`/boards/${boardId}`);
+
+    setBoards(boards.filter((b) => b._id !== boardId));
+
+  } catch (error) {
+    alert("Failed to delete board");
   }
+};
 
   // Start editing a board name
   function handleStartEdit(board) {
-    setEditingBoard(board.id)
+    setEditingBoard(board._id)
     setEditTitle(board.title)
   }
 
   // Save edited board name
   function handleSaveEdit() {
-    if (!editTitle.trim()) return
-    setBoards(boards.map((b) =>
-      b.id === editingBoard ? { ...b, title: editTitle.trim() } : b
-    ))
-    setEditingBoard(null)
-    setEditTitle('')
-  }
+  if (!editTitle.trim()) return;
+
+  setBoards(boards.map((b) =>
+    b._id === editingBoard ? { ...b, title: editTitle.trim() } : b
+  ));
+
+  setEditingBoard(null);
+  setEditTitle('');
+}
 
   // Update board data from KanbanBoard (after drag-drop or adding tasks)
   function handleUpdateBoard(updatedBoard) {
-    setBoards(boards.map((b) => (b.id === updatedBoard.id ? updatedBoard : b)))
-  }
+  setBoards(boards.map((b) =>
+    b._id === updatedBoard._id ? updatedBoard : b
+  ));
+}
+
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
@@ -382,9 +298,9 @@ function Dashboard() {
                   <BoardCard
                     key={board.id}
                     board={board}
-                    onOpen={() => setSelectedBoardId(board.id)}
+                    onOpen={() => setSelectedBoardId(board._id)}
                     onEdit={() => handleStartEdit(board)}
-                    onDelete={() => handleDeleteBoard(board.id)}
+                    onDelete={() => handleDeleteBoard(board._id)}
                   />
                 ))}
               </div>
