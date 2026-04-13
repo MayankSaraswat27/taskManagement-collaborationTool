@@ -4,15 +4,34 @@ import { motion } from 'framer-motion';
 import  {Input}  from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Mail, Lock, Zap, ArrowLeft } from 'lucide-react';
+import API from "../api";
 
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
- const handleSubmit = (e) => {
+ const handleSubmit = async (e) => {
   e.preventDefault();
-  navigate('/dashboard');
+
+  try {
+    const { data } = await API.post("/auth/login", {
+      email,
+      password,
+    });
+
+    // 🔐 store token
+    localStorage.setItem("token", data.token);
+
+    // (optional) store user
+    localStorage.setItem("user", JSON.stringify(data.user));
+
+    // redirect
+    navigate("/dashboard");
+
+  } catch (error) {
+    alert(error.response?.data?.message || "Login failed");
+  }
 };
 
   return (
@@ -232,3 +251,4 @@ export const Login = () => {
     </div>
   );
 };
+export default Login;
