@@ -109,15 +109,10 @@ export const Home = () => {
               Built for teams who want to get things done without the hassle.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link to="/dashboard">
+            <div className="flex justify-center">
+              <Link to="/login">
                 <Button variant="primary" size="lg">
                   Get Started Free <ArrowRight className="w-5 h-5" />
-                </Button>
-              </Link>
-              <Link to="/dashboard">
-                <Button variant="outline" size="lg">
-                  View Demo
                 </Button>
               </Link>
             </div>
@@ -296,7 +291,7 @@ export const Home = () => {
       </h2>
 
       <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-        Join thousands of teams already using FlowSync
+        Join thousands of teams already using Trackify
       </p>
 
       <div className="flex justify-center">
@@ -314,3 +309,4 @@ export const Home = () => {
     </div>
   );
 };
+export default Home;
