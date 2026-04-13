@@ -109,15 +109,10 @@ export const Home = () => {
               Built for teams who want to get things done without the hassle.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link to="/dashboard">
+            <div className="flex justify-center">
+              <Link to="/login">
                 <Button variant="primary" size="lg">
                   Get Started Free <ArrowRight className="w-5 h-5" />
-                </Button>
-              </Link>
-              <Link to="/dashboard">
-                <Button variant="outline" size="lg">
-                  View Demo
                 </Button>
               </Link>
             </div>
@@ -282,30 +277,36 @@ export const Home = () => {
         </div>
       </section>
 
-      <section className="py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10" />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Ready to boost your productivity?
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-              Join thousands of teams already using FlowSync
-            </p>
-            <Link to="/signup">
-              <Button variant="primary" size="lg">
-                Start Free Today <Zap className="w-5 h-5" />
-              </Button>
-            </Link>
-          </motion.div>
-        </div>
-      </section>
+   <section className="py-20 relative overflow-hidden">
+  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10" />
+
+  <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+    >
+      <h2 className="text-4xl md:text-5xl font-bold mb-6">
+        Ready to boost your productivity?
+      </h2>
+
+      <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
+        Join thousands of teams already using Trackify
+      </p>
+
+      <div className="flex justify-center">
+        <Link to="/signup">
+          <Button variant="primary" size="lg">
+            Start Free Today <Zap className="w-5 h-5" />
+          </Button>
+        </Link>
+      </div>
+    </motion.div>
+  </div>
+</section>
 
       <Footer />
     </div>
   );
 };
+export default Home;

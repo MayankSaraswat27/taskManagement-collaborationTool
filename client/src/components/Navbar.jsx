@@ -13,9 +13,9 @@ export const Navbar = () => {
   const isHomePage = location.pathname === '/';
 
   const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'Features', path: '/#features' },
-    { name: 'Working', path: '/#working' }
+    { name: 'Home', path: '#' },
+    { name: 'Features', path: '#features' },
+    { name: 'Working', path: '#working' }
   ];
 
   return (
@@ -57,7 +57,17 @@ export const Navbar = () => {
 
             {location.pathname === '/dashboard' && (
               <Link to="/">
-                <Button variant="outline" size="sm">Logout</Button>
+                <Button
+  variant="outline"
+  size="sm"
+  onClick={() => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/";
+  }}
+>
+  Logout
+</Button>
               </Link>
             )}
           </div>

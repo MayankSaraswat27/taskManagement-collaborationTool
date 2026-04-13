@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Dashboard from "./pages/Dashboard";
@@ -10,14 +11,13 @@ import { AppProvider } from "./context/AppContext";
 import "./index.css";
 import "./App.css";
 
-// =======================
-// PROTECTED ROUTE
-// =======================
+
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
 
   return token ? children : <Navigate to="/login" />;
 };
+
 
 function App() {
   return (
@@ -27,6 +27,7 @@ function App() {
 
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
+
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
 
@@ -40,6 +41,7 @@ function App() {
             }
           />
 
+
         </Routes>
       </BrowserRouter>
     </AppProvider>
@@ -47,3 +49,4 @@ function App() {
 }
 
 export default App;
+

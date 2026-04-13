@@ -4,15 +4,34 @@ import { motion } from 'framer-motion';
 import  {Input}  from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Mail, Lock, Zap, ArrowLeft } from 'lucide-react';
+import API from "../api";
 
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
- const handleSubmit = (e) => {
+ const handleSubmit = async (e) => {
   e.preventDefault();
-  navigate('/dashboard');
+
+  try {
+    const { data } = await API.post("/auth/login", {
+      email,
+      password,
+    });
+
+    // 🔐 store token
+    localStorage.setItem("token", data.token);
+
+    // (optional) store user
+    localStorage.setItem("user", JSON.stringify(data.user));
+
+    // redirect
+    navigate("/dashboard");
+
+  } catch (error) {
+    alert(error.response?.data?.message || "Login failed");
+  }
 };
 
   return (
@@ -133,29 +152,32 @@ export const Login = () => {
             onSubmit={handleSubmit}
             className="space-y-6"
           >
-            <div className="relative">
-             
-              <Input
-                type="email"
-                label="Email Address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-14"
-                required
-              />
-            </div>
+        <div className="relative">
+  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
 
-            <div className="relative">
-             
-              <Input
-                type="password"
-                label="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pl-12"
-                required
-              />
-            </div>
+
+  <Input
+    type="email"
+    placeholder="Email Address"
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+    className="pl-10"
+    required
+  />
+</div>
+
+          <div className="relative">
+  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+
+  <Input
+    type="password"
+    placeholder="Password"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    className="pl-10"
+    required
+  />
+</div>
 
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -229,3 +251,4 @@ export const Login = () => {
     </div>
   );
 };
+export default Login;

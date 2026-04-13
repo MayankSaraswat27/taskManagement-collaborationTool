@@ -1,155 +1,114 @@
 import Task from "../models/taskSchema.js";
-
-
-/*
-CREATE TASK INSIDE LIST
-*/
+import List from "../models/listModel.js";
 
 export const createTask = async (req, res) => {
+  try {
+    const { title, description, status, list, assignedTo } = req.body;
 
-    try {
-
-        const { title, description, status, listId } = req.body;
-
-        const task = await Task.create({
-
-            title,
-            description,
-            status,
-            listId,
-            createdBy: req.user.id
-
-        });
-
-        res.status(201).json(task);
-
+    const listExists = await List.findById(list);
+    if (!listExists) {
+      return res.status(404).json({ message: "List not found" });
     }
 
-    catch (error) {
+    const task = await Task.create({
+      title,
+      description,
+      status,
+      list,
+      createdBy: req.user.id,
+      assignedTo,
+    });
 
-        res.status(500).json({
+    listExists.tasks.push(task._id);
+    await listExists.save();
 
-            message: error.message
-
-        });
-
-    }
-
+    res.status(201).json(task);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
-
-
-
-/*
-GET TASKS OF A LIST
-*/
 
 export const getTasks = async (req, res) => {
+  try {
+    const tasks = await Task.find({
+      list: req.params.listId,
+    })
+      .populate("assignedTo", "name email")
+      .populate("createdBy", "name email")
+      .sort({ position: 1 });
 
-    try {
-
-        const tasks = await Task.find({
-
-            listId: req.params.listId
-
-        });
-
-        res.json(tasks);
-
-    }
-
-    catch (error) {
-
-        res.status(500).json({
-
-            message: error.message
-
-        });
-
-    }
-
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
-
-
-
-/*
-UPDATE TASK
-*/
-
-export const updateTask = async (req, res) => {
-
-    try {
-
-        const task = await Task.findByIdAndUpdate(
-
-            req.params.id,
-
-            req.body,
-
-            { new: true }
-
-        );
-
-        res.json(task);
-
-    }
-
-    catch (error) {
-
-        res.status(500).json({
-
-            message: error.message
-
-        });
-
-    }
-
-};
-
-
 
 export const getSingleTask = async (req, res) => {
-    try {
-        const task = await Task.findById(req.params.id);
+  try {
+    const task = await Task.findById(req.params.id)
+      .populate("assignedTo", "name email")
+      .populate("createdBy", "name email");
 
-        if (!task) {
-            return res.status(404).json({ message: "Task not found" });
-        }
-
-        res.json(task);
-
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
     }
+
+    res.json(task);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
+export const updateTask = async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id);
 
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
 
-/*
-DELETE TASK
-*/
+    if (req.body.list && req.body.list !== task.list.toString()) {
+      const oldList = await List.findById(task.list);
+      const newList = await List.findById(req.body.list);
+
+      oldList.tasks = oldList.tasks.filter(
+        (t) => t.toString() !== task._id.toString()
+      );
+      await oldList.save();
+
+      newList.tasks.push(task._id);
+      await newList.save();
+    }
+
+    Object.assign(task, req.body);
+    const updatedTask = await task.save();
+
+    res.json(updatedTask);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 export const deleteTask = async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id);
 
-    try {
-
-        await Task.findByIdAndDelete(req.params.id);
-
-        res.json({
-
-            message: "Task deleted successfully"
-
-        });
-
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
     }
 
-    catch (error) {
-
-        res.status(500).json({
-
-            message: error.message
-
-        });
-
+    const list = await List.findById(task.list);
+    if (list) {
+      list.tasks = list.tasks.filter(
+        (t) => t.toString() !== task._id.toString()
+      );
+      await list.save();
     }
 
+    await task.deleteOne();
+
+    res.json({ message: "Task deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
