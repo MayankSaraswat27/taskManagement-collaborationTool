@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import passport from "./config/passport.js";
+import session from "express-session";
+import googleAuthRoute from "./routes/googleAuthRoute.js";
 
 import connectDB from "./config/db.js";
 
@@ -24,9 +27,18 @@ app.use(
     credentials: true,
   })
 );
+app.use(
+  session({
+    secret: "secret",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.json());
-
+app.use("/auth", googleAuthRoute);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
