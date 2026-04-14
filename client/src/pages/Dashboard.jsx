@@ -16,13 +16,32 @@ const navItems = [
       </svg>
     ),
   },
+  {
+    id: 'progress',
+    label: 'Progress',
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l2 2m7 1a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+  {
+  id: 'logout',
+  label: 'Logout',
+  icon: (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10V7" />
+    </svg>
+  ),
+}
 ]
 
 function BoardCard({ board, onEdit, onDelete, onOpen }) {
   const [showMenu, setShowMenu] = useState(false)
 
-  const totalTasks = 0;
-const completedCount = 0;
+  const totalLists = board.lists?.length || 0;
+  const memberCount = board.members?.length || 0;
 
   // Board color themes
   const boardColors = [
@@ -37,7 +56,7 @@ const completedCount = 0;
 
   return (
     <div
-      className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer group"
+      className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-visible cursor-pointer group"
       onClick={onOpen}
     >
       {/* Color header strip */}
@@ -59,7 +78,7 @@ const completedCount = 0;
               </svg>
             </button>
             {showMenu && (
-              <div className="absolute right-0 top-8 bg-white border border-gray-100 rounded-xl shadow-lg z-10 w-36 py-1 overflow-hidden">
+              <div className="absolute right-0 top-8 bg-white border border-gray-100 rounded-xl shadow-lg z-50 w-36 py-1 overflow-visible">
                 <button
                   onClick={() => { onEdit(); setShowMenu(false) }}
                   className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
@@ -83,60 +102,79 @@ const completedCount = 0;
           </div>
         </div>
 
-        {/* Task stats */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h10M7 11h10M7 15h10" />
             </svg>
-            <span className="text-xs text-gray-500">{totalTasks} tasks</span>
+            <span className="text-xs text-gray-500">{totalLists} lists</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg className="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11a4 4 0 10-8 0 4 4 0 008 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 7v4m0 0v4m0-4h4m-4 0H8" />
             </svg>
-            <span className="text-xs text-gray-500">{completedCount} done</span>
+            <span className="text-xs text-gray-500">{memberCount} members</span>
           </div>
         </div>
-
-        {/* Progress bar */}
-        {totalTasks > 0 && (
-          <div className="mt-3">
-            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-emerald-400 rounded-full transition-all duration-300"
-                style={{ width: `${Math.round((completedCount / totalTasks) * 100)}%` }}
-              ></div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )
 }
 
 function Dashboard() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [boards, setBoards] = useState([]);
+  const [progress, setProgress] = useState(null);
+  const [progressLoading, setProgressLoading] = useState(false);
+  const [progressError, setProgressError] = useState(null);
 
-useEffect(() => {
-  fetchBoards();
-}, []);
+  const [activeNav, setActiveNav] = useState("dashboard");
 
-const fetchBoards = async () => {
-  try {
-    const { data } = await API.get("/boards");
-    setBoards(data);
-  } catch (error) {
-    console.error("Error fetching boards", error);
-  }
+  useEffect(() => {
+    fetchBoards();
+  }, []);
+
+  useEffect(() => {
+    if (activeNav === "progress") {
+      fetchProgress();
+    }
+  }, [activeNav]);
+
+  const fetchBoards = async () => {
+    try {
+      const { data } = await API.get("/boards");
+      setBoards(data);
+    } catch (error) {
+      console.error("Error fetching boards", error);
+    }
+  };
+
+  
+  const handleLogout = () => {
+  localStorage.removeItem("token"); // remove auth token
+  navigate("/login"); // redirect to login page
 };
-  const [activeNav, setActiveNav] = useState('dashboard')
-  const [selectedBoardId, setSelectedBoardId] = useState(null)
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [newBoardTitle, setNewBoardTitle] = useState('')
-  const [editingBoard, setEditingBoard] = useState(null)
-  const [editTitle, setEditTitle] = useState('')
+
+  const fetchProgress = async () => {
+    try {
+      setProgressLoading(true);
+      const { data } = await API.get("/reports/progress");
+      setProgress(data);
+      setProgressError(null);
+    } catch (error) {
+      console.error("Error fetching progress", error);
+      setProgressError("Unable to load progress summary");
+    } finally {
+      setProgressLoading(false);
+    }
+  };
+
+  const [selectedBoardId, setSelectedBoardId] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newBoardTitle, setNewBoardTitle] = useState("");
+  const [editingBoard, setEditingBoard] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
 
 
   const selectedBoard = boards.find(
@@ -180,23 +218,33 @@ const fetchBoards = async () => {
   }
 
   // Save edited board name
-  function handleSaveEdit() {
-  if (!editTitle.trim()) return;
+  async function handleSaveEdit() {
+    if (!editTitle.trim()) return;
 
-  setBoards(boards.map((b) =>
-    b._id === editingBoard ? { ...b, title: editTitle.trim() } : b
-  ));
+    try {
+      const { data } = await API.put(`/boards/${editingBoard}`, {
+        title: editTitle.trim(),
+      });
 
-  setEditingBoard(null);
-  setEditTitle('');
-}
+      setBoards(boards.map((b) =>
+        b._id === editingBoard ? data : b
+      ));
+    } catch (error) {
+      console.error("Failed to update board", error);
+      alert("Unable to save changes");
+    } finally {
+      setEditingBoard(null);
+      setEditTitle("");
+    }
+  }
 
   // Update board data from KanbanBoard (after drag-drop or adding tasks)
   function handleUpdateBoard(updatedBoard) {
-  setBoards(boards.map((b) =>
-    b._id === updatedBoard._id ? updatedBoard : b
-  ));
-}
+    setBoards(boards.map((b) =>
+      b._id === updatedBoard._id ? updatedBoard : b
+    ));
+  }
+
 
 
   return (
@@ -216,7 +264,14 @@ const fetchBoards = async () => {
           {navItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => { setActiveNav(item.id); setSelectedBoardId(null) }}
+              onClick={() => {
+  if (item.id === "logout") {
+    handleLogout();
+  } else {
+    setActiveNav(item.id);
+    setSelectedBoardId(null);
+  }
+}}
               className={`
                 w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left
                 ${activeNav === item.id
@@ -255,6 +310,64 @@ const fetchBoards = async () => {
               onBack={() => setSelectedBoardId(null)}
             />
           </div>
+        ) : activeNav === "progress" ? (
+          <div className="p-8">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Progress Summary</h1>
+                <p className="text-sm text-gray-500 mt-1">Track task completion across your boards</p>
+              </div>
+              <button
+                onClick={() => setActiveNav("dashboard")}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"
+              >
+                Back to boards
+              </button>
+            </div>
+
+            {progressLoading ? (
+              <div className="text-gray-600">Loading progress...</div>
+            ) : progressError ? (
+              <div className="text-red-500">{progressError}</div>
+            ) : progress ? (
+              <div className="grid gap-4 lg:grid-cols-2">
+                <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+                  <p className="text-sm font-medium text-gray-500">Boards</p>
+                  <p className="mt-3 text-3xl font-semibold text-gray-900">{progress.boardCount}</p>
+                </div>
+                <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+                  <p className="text-sm font-medium text-gray-500">Total tasks</p>
+                  <p className="mt-3 text-3xl font-semibold text-gray-900">{progress.totalTasks}</p>
+                </div>
+                <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+                  <p className="text-sm font-medium text-gray-500">Completed</p>
+                  <p className="mt-3 text-3xl font-semibold text-gray-900">{progress.completedTasks}</p>
+                </div>
+                <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+                  <p className="text-sm font-medium text-gray-500">In progress</p>
+                  <p className="mt-3 text-3xl font-semibold text-gray-900">{progress.inProgressTasks}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-gray-600">No progress data available yet.</div>
+            )}
+
+            {progress?.boardSummaries?.length ? (
+              <div className="mt-8 space-y-4">
+                <h2 className="text-lg font-semibold text-gray-900">Board details</h2>
+                <div className="grid gap-4">
+                  {progress.boardSummaries.map((summary) => (
+                    <div key={summary.boardId} className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-gray-900">{summary.title}</h3>
+                        <span className="text-sm text-gray-500">{summary.completedTasks}/{summary.totalTasks} done</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
         ) : (
           /* Dashboard overview */
           <div className="p-8">
@@ -271,7 +384,7 @@ const fetchBoards = async () => {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                New List
+                New Board
               </button>
             </div>
 
@@ -296,7 +409,7 @@ const fetchBoards = async () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {boards.map((board) => (
                   <BoardCard
-                    key={board.id}
+                    key={board._id}
                     board={board}
                     onOpen={() => setSelectedBoardId(board._id)}
                     onEdit={() => handleStartEdit(board)}
