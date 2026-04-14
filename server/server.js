@@ -25,7 +25,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://task-management-collaboration-tool-seven.vercel.app/",
+    origin: "https://task-management-collaboration-tool-seven.vercel.app",
     credentials: true,
   })
 );
