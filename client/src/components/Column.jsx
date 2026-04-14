@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import TaskCard from './TaskCard'
+import { Droppable, Draggable } from "@hello-pangea/dnd";
 
 // Column accent colors
 const columnColors = {
@@ -52,26 +53,52 @@ function Column({ title, tasks, columnId, onAddTask, onDelete }) {
       </div>
 
       {/* Tasks */}
-      <div className="flex-1 min-h-20 rounded-xl p-2 bg-gray-50">
-        {tasks.map((task, index) => (
-          <TaskCard
-            key={task._id}
-            task={task}
-            index={index}
-            onDelete={onDelete}
-          />
-        ))}
+      <Droppable droppableId={columnId}>
+  {(provided) => (
+    <div
+      ref={provided.innerRef}
+      {...provided.droppableProps}
+      className="flex-1 min-h-20 rounded-xl p-2 bg-gray-50"
+    >
 
-        {/* Empty state */}
-        {tasks.length === 0 && !showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="w-full py-3 text-xs text-gray-400 hover:bg-white rounded-lg border-2 border-dashed border-gray-200"
-          >
-            + Add a task
-          </button>
-        )}
-      </div>
+      {tasks.map((task, index) => (
+        <Draggable
+          key={task._id}
+          draggableId={task._id.toString()}
+          index={index}
+        >
+          {(provided) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.draggableProps}
+              {...provided.dragHandleProps}
+            >
+              <TaskCard
+                task={task}
+                index={index}
+                onDelete={onDelete}
+              />
+            </div>
+          )}
+        </Draggable>
+      ))}
+
+      {/* 🔥 REQUIRED */}
+      {provided.placeholder}
+
+      {/* Empty state */}
+      {tasks.length === 0 && !showForm && (
+        <button
+          onClick={() => setShowForm(true)}
+          className="w-full py-3 text-xs text-gray-400 hover:bg-white rounded-lg border-2 border-dashed border-gray-200"
+        >
+          + Add a task
+        </button>
+      )}
+
+    </div>
+  )}
+</Droppable>
 
       {/* Add Task Form */}
       {showForm && (
