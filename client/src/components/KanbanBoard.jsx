@@ -1,4 +1,4 @@
-
+import { DragDropContext } from "@hello-pangea/dnd";
 import Column from '../components/Column'
 import API from "../api";
 import { useEffect, useState } from "react";
@@ -102,6 +102,54 @@ function KanbanBoard({ board, onUpdateBoard, onBack, onDeleteBoard }) {
     }
   };
 
+  const handleDragEnd = async (result) => {
+  const { source, destination } = result;
+
+  if (!destination) return;
+
+  // same list → reorder
+  if (source.droppableId === destination.droppableId) {
+    const list = lists.find(l => l._id === source.droppableId);
+    const newTasks = Array.from(list.tasks);
+    const [moved] = newTasks.splice(source.index, 1);
+    newTasks.splice(destination.index, 0, moved);
+
+    const newLists = lists.map(l =>
+      l._id === list._id ? { ...l, tasks: newTasks } : l
+    );
+
+    setLists(newLists);
+    return;
+  }
+
+  // move between lists
+  const sourceList = lists.find(l => l._id === source.droppableId);
+  const destList = lists.find(l => l._id === destination.droppableId);
+
+  const sourceTasks = Array.from(sourceList.tasks);
+  const destTasks = Array.from(destList.tasks);
+
+  const [movedTask] = sourceTasks.splice(source.index, 1);
+  destTasks.splice(destination.index, 0, movedTask);
+
+  const newLists = lists.map(l => {
+    if (l._id === sourceList._id) return { ...l, tasks: sourceTasks };
+    if (l._id === destList._id) return { ...l, tasks: destTasks };
+    return l;
+  });
+
+  setLists(newLists);
+
+  // 🔥 update backend (VERY IMPORTANT)
+  try {
+    await API.put(`/tasks/${movedTask._id}`, {
+      list: destination.droppableId,
+    });
+  } catch (error) {
+    console.error("Failed to update task", error);
+  }
+};
+
   return (
     <div className="flex flex-col h-full">
       {/* Board header */}
@@ -163,7 +211,8 @@ function KanbanBoard({ board, onUpdateBoard, onBack, onDeleteBoard }) {
         </div>
       </div>
 
-      <div className="flex gap-5 overflow-x-auto pb-4">
+      <DragDropContext onDragEnd={handleDragEnd}>
+  <div className="flex gap-5 overflow-x-auto pb-4">
         {lists.map((list) => (
           <Column
             key={list._id}
@@ -174,7 +223,8 @@ function KanbanBoard({ board, onUpdateBoard, onBack, onDeleteBoard }) {
             onDelete={handleDeleteTask}
           />
         ))}
-      </div>
+        </div>
+</DragDropContext>
     </div>
   )
 }
