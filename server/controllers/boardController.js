@@ -1,6 +1,7 @@
 import Board from "../models/boardModel.js";
 import List from "../models/listModel.js";
 import Task from "../models/taskSchema.js";
+import User from "../models/User.js";
 
 export const createBoard = async (req, res) => {
   try {
@@ -9,7 +10,7 @@ export const createBoard = async (req, res) => {
     const board = await Board.create({
       title,
       createdBy: req.user.id,
-      members: [req.user.id], 
+      members: [req.user.id],
     });
 
     const lists = await List.insertMany([
@@ -21,8 +22,12 @@ export const createBoard = async (req, res) => {
     board.lists = lists.map((l) => l._id);
     await board.save();
 
-    res.status(201).json(board);
+    const populatedBoard = await Board.findById(board._id).populate(
+      "members",
+      "name email"
+    );
 
+    res.status(201).json(populatedBoard);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -67,9 +72,37 @@ export const getSingleBoard = async (req, res) => {
   }
 };
 
+export const updateBoard = async (req, res) => {
+  try {
+    const board = await Board.findById(req.params.id);
+
+    if (!board) {
+      return res.status(404).json({ message: "Board not found" });
+    }
+
+    if (!board.members.some((member) => member.toString() === req.user.id.toString())) {
+      return res.status(403).json({ message: "Only board members can update the board" });
+    }
+
+    board.title = req.body.title || board.title;
+    board.description = req.body.description ?? board.description;
+
+    await board.save();
+
+    const updatedBoard = await Board.findById(board._id).populate(
+      "members",
+      "name email"
+    );
+
+    res.json(updatedBoard);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const addMembers = async (req, res) => {
   try {
-    const { userIds } = req.body;
+    const { userIds = [], emails = [] } = req.body;
 
     const board = await Board.findById(req.params.id);
 
@@ -77,15 +110,35 @@ export const addMembers = async (req, res) => {
       return res.status(404).json({ message: "Board not found" });
     }
 
-    userIds.forEach((id) => {
-      if (!board.members.includes(id)) {
+    if (!board.members.some((member) => member.toString() === req.user.id.toString())) {
+      return res.status(403).json({ message: "Only board members can invite collaborators" });
+    }
+
+    const usersToAdd = [];
+
+    if (userIds.length) {
+      usersToAdd.push(...userIds);
+    }
+
+    if (emails.length) {
+      const users = await User.find({ email: { $in: emails } });
+      users.forEach((user) => usersToAdd.push(user._id));
+    }
+
+    usersToAdd.forEach((id) => {
+      if (!board.members.some((member) => member.toString() === id.toString())) {
         board.members.push(id);
       }
     });
 
     await board.save();
 
-    res.json(board);
+    const updatedBoard = await Board.findById(board._id).populate(
+      "members",
+      "name email"
+    );
+
+    res.json(updatedBoard);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -99,13 +152,22 @@ export const removeMember = async (req, res) => {
       return res.status(404).json({ message: "Board not found" });
     }
 
+    if (!board.members.some((member) => member.toString() === req.user.id.toString())) {
+      return res.status(403).json({ message: "Only board members can remove collaborators" });
+    }
+
     board.members = board.members.filter(
       (m) => m.toString() !== req.params.userId
     );
 
     await board.save();
 
-    res.json(board);
+    const updatedBoard = await Board.findById(board._id).populate(
+      "members",
+      "name email"
+    );
+
+    res.json(updatedBoard);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
